@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Program
 {
     public static void Main(string[] args)
     {
         Console.WriteLine("Perceptron starting!");
+        Console.WriteLine($"params: {args.Aggregate("", (acc, a) => acc += " " + a)}");
+        double learningRate = double.Parse(args[0].Replace('.', ','));
+        Console.WriteLine($"learning rate: {learningRate}");
         Console.WriteLine("-".PadLeft(20));
         Console.WriteLine("-".PadLeft(20));
         Console.WriteLine("-".PadLeft(20));
@@ -19,8 +23,6 @@ public class Program
             initialWeights[i] = rng.NextDouble() * 2 - 1;
         }
         double bias = rng.NextDouble() * 2 - 1;
-
-        double learningRate = 0.1;
 
         Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias);
         #endregion
@@ -90,6 +92,7 @@ public class Program
             if (command == "exit") break;
             if (command == "") break;
 
+            Console.WriteLine();
             switch (command)
             {
                 case "t":
@@ -112,11 +115,24 @@ public class Program
                 case "d":
                     Console.WriteLine(perceptron.Dump());
                     break;
+                case "test":
+                    Console.WriteLine($"x1 | x2 | y | decision");
+                    foreach (var to in trainData)
+                    {
+                        var decision = perceptron.Feedforward(to.Input);
+                        Console.Write(to.Input[0].ToString().PadRight(3) + "|");
+                        Console.Write(" " + to.Input[1].ToString().PadRight(3) + "|");
+                        Console.Write(" " + to.Solution.ToString().PadRight(2) + "|");
+                        Console.Write(" " + decision);
+                        Console.Write(decision == to.Solution ? "" : "[x]");
+                        Console.WriteLine();
+                    }
+                    break;
                 default:
                     break;
             }
+            Console.WriteLine();
         }
-
 
         Console.WriteLine();
         Console.WriteLine("\n".PadLeft(3));
