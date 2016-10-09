@@ -124,7 +124,7 @@ public class Program
                         Console.Write(" " + to.Input[1].ToString().PadRight(3) + "|");
                         Console.Write(" " + to.Solution.ToString().PadRight(2) + "|");
                         Console.Write(" " + decision);
-                        Console.Write(decision == to.Solution ? "" : "[x]");
+                        Console.Write(decision == to.Solution ? "" : " [x]");
                         Console.WriteLine();
                     }
                     break;
