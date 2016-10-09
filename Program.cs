@@ -16,8 +16,9 @@ public class Program
         Console.WriteLine("\n".PadLeft(3));
 
         #region INITIALIZE PERCEPTRON 
+        int inputCount = 2;
         Random rng = new Random();
-        double[] initialWeights = new double[2];
+        double[] initialWeights = new double[inputCount];
         for (int i = 0; i < initialWeights.Length; i++)
         {
             initialWeights[i] = rng.NextDouble() * 2 - 1;
