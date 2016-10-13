@@ -49,6 +49,7 @@ public class Program
         Console.WriteLine($"{"change".PadRight(10)} (change) - create new perceptron");
         Console.WriteLine($"{"e".PadRight(10)} (e) - run experiment");
         Console.WriteLine($"{"es".PadRight(10)} (es) - toggle silent mode for experiments");
+        Console.WriteLine($"{"octave".PadRight(10)} (octave) - generate octave function plot");
         Console.WriteLine("-".PadRight(20, '-'));
 
         string line;
@@ -189,6 +190,10 @@ public class Program
                 case "es":
                     ExperimentRunner.Silent = !ExperimentRunner.Silent;
                     WriteResponseLine($"Experiment runner mode - {(ExperimentRunner.Silent ? "silent" : "verbose")}");
+                    break;
+                case "octave":
+                    var octaveCode = perceptron?.GenerateOctaveCode();
+                    WriteResponseLine(octaveCode);
                     break;
                 default:
                     WriteErrorLine("No such command");

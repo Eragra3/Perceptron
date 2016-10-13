@@ -87,6 +87,29 @@ public class Perceptron
 
         return sb.ToString();
     }
+
+    public string GenerateOctaveCode()
+    {
+        StringBuilder sb = new StringBuilder("f = @(");
+        for (var i = 0; i < _weights.Length; i++)
+        {
+            sb.Append("x" + i);
+            if (i + i < _weights.Length) sb.Append(",");
+        }
+        sb.Append(") ");
+        for (var i = 0; i < _weights.Length; i++)
+        {
+            var weight = _weights[i];
+            sb.Append(weight.ToString().Replace(',', '.'));
+            sb.Append("*x" + i);
+            if (i + i < _weights.Length) sb.Append("+");
+        }
+        sb.Append("+");
+        sb.Append(_bias.ToString().Replace(',', '.'));
+        sb.Append(";ezplot(f,[0,1]);");
+        sb.Append("grid on;");
+        return sb.ToString();
+    }
 }
 
 public enum StepFunctionEnum
