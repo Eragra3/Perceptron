@@ -9,11 +9,12 @@ public static class PerceptronTrainer
     public static IList<TrainObject> andTraingData;
     static PerceptronTrainer()
     {
+        Func<double, double, double> andFunction = (x, y) => x + y - 1;
         andTraingData = new List<TrainObject>(10);
-        TrainObject t1 = new TrainObject(new double[] { 0, 0 }, 0);
-        TrainObject t2 = new TrainObject(new double[] { 0, 1 }, 0);
-        TrainObject t3 = new TrainObject(new double[] { 1, 0 }, 0);
-        TrainObject t4 = new TrainObject(new double[] { 1, 1 }, 1);
+        TrainObject t1 = new TrainObject(new double[] { 0, 0 }, 0, andFunction(0, 0));
+        TrainObject t2 = new TrainObject(new double[] { 0, 1 }, 0, andFunction(0, 1));
+        TrainObject t3 = new TrainObject(new double[] { 1, 0 }, 0, andFunction(1, 0));
+        TrainObject t4 = new TrainObject(new double[] { 1, 1 }, 1, andFunction(1, 1));
         andTraingData.Add(t1);
         andTraingData.Add(t2);
         andTraingData.Add(t3);
@@ -54,28 +55,57 @@ public static class PerceptronTrainer
         return CreatePerceptron(learningRate, initialWeightLimit, inputsCount, StepFunctionEnum.Unipolar);
     }
 
-    public static int TrainPerceptron_And(Perceptron perceptron, bool silent = false)
+    public static int TrainPerceptron_And(Perceptron perceptron, double adalineThreshold = 1, bool silent = false)
     {
         bool isTrained = false;
         int epoch = 0;
-        while (!isTrained)
+        if (perceptron.IsAdaline)
         {
-            epoch++;
-            if (!silent) WriteResponseLine($"Learning epoch - {epoch}");
-            isTrained = true;
-            foreach (var trainObject in andTraingData)
+            if (!silent) WriteResponseLine($"Using adaline, error treshold - {adalineThreshold}");
+            double errorSum;
+            do
             {
-                var error = perceptron.Train(trainObject.Input, trainObject.Solution);
-                if (error != 0)
+                epoch++;
+                errorSum = 0;
+                if (!silent) WriteResponse($"Learning epoch - {epoch}");
+                foreach (var trainObject in andTraingData)
                 {
-                    isTrained = false;
+                    errorSum += Math.Abs(perceptron.Train(trainObject));
+                }
+
+                if (!silent) WriteResponseLine($" current error - {errorSum}");
+
+                if (epoch > 10000)
+                {
+                    WriteErrorLine("Stopping!");
+                    WriteErrorLine("Did not learn nothing in 10000 epochs!");
+                    WriteErrorLine("Using adaline, current values: error-{error} > threshold-{adalineThreshold}");
+                    throw new Exception();
                 }
             }
-            if (epoch > 10000)
+            while (errorSum > adalineThreshold);
+        }
+        else
+        {
+            while (!isTrained)
             {
-                WriteErrorLine("Stopping!");
-                WriteErrorLine("Did not learn anything in 10000 epochs!");
-                throw new Exception();
+                epoch++;
+                if (!silent) WriteResponseLine($"Learning epoch - {epoch}");
+                isTrained = true;
+                foreach (var trainObject in andTraingData)
+                {
+                    var error = perceptron.Train(trainObject);
+                    if (error != 0)
+                    {
+                        isTrained = false;
+                    }
+                }
+                if (epoch > 10000)
+                {
+                    WriteErrorLine("Stopping!");
+                    WriteErrorLine("Did not learn nothing in 10000 epochs!");
+                    throw new Exception();
+                }
             }
         }
         return epoch;

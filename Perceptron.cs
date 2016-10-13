@@ -58,9 +58,9 @@ public class Perceptron
 
     public double Train(TrainObject to)
     {
-        return Train(to.Input, to.Solution);
+        return Train(to.Input, to.Solution, to.Net);
     }
-    public double Train(double[] input, double solution)
+    public double Train(double[] input, int solution, double net)
     {
         if (IsBipolar)
         {
@@ -69,12 +69,26 @@ public class Perceptron
 
         var decision = Feedforward(input);
 
-
-        var error = solution - decision;
+        double error;
+        if (IsAdaline)
+        {
+            error = net - Net(input);
+        }
+        else
+        {
+            error = solution - decision;
+        }
 
         for (int i = 0; i < _weights.Length; i++)
         {
-            _weights[i] += _learningRate * input[i] * error;
+            if (IsAdaline)
+            {
+                _weights[i] += _learningRate * input[i] * error;
+            }
+            else
+            {
+                _weights[i] += _learningRate * input[i] * error;
+            }
         }
         _bias += _learningRate * error;
 
