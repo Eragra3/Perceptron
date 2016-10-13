@@ -94,7 +94,7 @@ public class Program
                     PerceptronTrainer.TrainPerceptron_And(perceptron);
                     break;
                 case "change":
-                    WriteResponseLine("learning-rate weights-range step-function(uni,bi)");
+                    WriteResponseLine("learning-rate weights-range step-function(uni,bi) use-adaline(y,n or nothing)");
                     try
                     {
                         var parameters = Prompt().Split(' ');
@@ -105,7 +105,15 @@ public class Program
                         else if (parameters[2] == "bi") stepFunction = StepFunctionEnum.Bipolar;
                         else throw new ArgumentException();
 
-                        perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction);
+                        bool useAdaline = false;
+                        if (parameters[3] == "y") useAdaline = true;
+
+
+                        perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction, useAdaline);
+                    }
+                    catch (PerceptronLearnException)
+                    {
+
                     }
                     catch (System.Exception)
                     {

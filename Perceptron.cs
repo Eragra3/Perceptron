@@ -8,9 +8,19 @@ public class Perceptron
     private double _learningRate;
     private double _bias;
     private StepFunctionEnum _stepFunction;
+    public bool IsAdaline;
+    public bool IsBipolar => _stepFunction == StepFunctionEnum.Bipolar;
 
-    private bool _isBipolar => _stepFunction == StepFunctionEnum.Bipolar;
-
+    public Perceptron(
+        double[] weights,
+        double learningRate,
+        double bias,
+        StepFunctionEnum stepFunction,
+        bool isAdaline
+        ) : this(weights, learningRate, bias, stepFunction)
+    {
+        IsAdaline = true;
+    }
     public Perceptron(
         double[] weights,
         double learningRate,
@@ -26,6 +36,7 @@ public class Perceptron
         _learningRate = learningRate;
         _bias = bias;
         _stepFunction = StepFunctionEnum.Unipolar;
+        IsAdaline = false;
     }
 
     public double Net(double[] input)
@@ -41,6 +52,7 @@ public class Perceptron
 
     public int Step(double sum)
     {
+        if (_stepFunction == StepFunctionEnum.Bipolar) return sum >= 0 ? 1 : -1;
         return sum >= 0 ? 1 : 0;
     }
 
@@ -50,12 +62,13 @@ public class Perceptron
     }
     public double Train(double[] input, double solution)
     {
-        if (_isBipolar)
+        if (IsBipolar)
         {
             if (solution == 0) solution = -1;
         }
 
         var decision = Feedforward(input);
+
 
         var error = solution - decision;
 
@@ -81,6 +94,7 @@ public class Perceptron
         sb.AppendLine("Perceptron data:");
         sb.AppendLine($"{"learning rate".PadRight(15)} : {_learningRate}");
         sb.AppendLine($"{"step function".PadRight(15)} : {_stepFunction}");
+        sb.AppendLine($"{"adaline".PadRight(15)} : {IsAdaline}");
         sb.AppendLine($"{"bias".PadRight(15)} : {_bias}");
         var weights = _weights.Aggregate("", (acc, w) => acc += Math.Round(w, 4).ToString() + ", ");
         sb.AppendLine($"{"weights".PadRight(15)} : {weights}");
@@ -100,12 +114,12 @@ public class Perceptron
         for (var i = 0; i < _weights.Length; i++)
         {
             var weight = _weights[i];
-            sb.Append(weight.ToString().Replace(',', '.'));
+            sb.Append(Math.Round(weight, 4).ToString().Replace(',', '.'));
             sb.Append("*x" + i);
             if (i + i < _weights.Length) sb.Append("+");
         }
         sb.Append("+");
-        sb.Append(_bias.ToString().Replace(',', '.'));
+        sb.Append(Math.Round(_bias, 4).ToString().Replace(',', '.'));
         sb.Append(";ezplot(f,[0,1]);");
         sb.Append("grid on;");
         return sb.ToString();

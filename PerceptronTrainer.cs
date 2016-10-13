@@ -24,7 +24,8 @@ public static class PerceptronTrainer
         double learningRate,
         double initialWeightLimit,
         int inputsCount,
-        StepFunctionEnum stepFunction)
+        StepFunctionEnum stepFunction,
+        bool useAdaline)
     {
         if (learningRate <= 0) throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
 
@@ -35,9 +36,17 @@ public static class PerceptronTrainer
         }
         double bias = initialWeightLimit * (_rng.NextDouble() * 2 - 1);
 
-        Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias);
+        Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias, stepFunction, useAdaline);
 
         return perceptron;
+    }
+    public static Perceptron CreatePerceptron(
+        double learningRate,
+        double initialWeightLimit,
+        int inputsCount,
+        StepFunctionEnum stepFunction)
+    {
+        return CreatePerceptron(learningRate, initialWeightLimit, inputsCount, stepFunction, false);
     }
 
     public static Perceptron CreatePerceptron(double learningRate, double initialWeightLimit, int inputsCount)
@@ -78,17 +87,19 @@ public static class PerceptronTrainer
         if (!silent) Console.WriteLine($"x1 | x2 | y | decision");
         foreach (var to in andTraingData)
         {
+            var solution = to.Solution;
+            if (perceptron.IsBipolar && solution == 0) solution = -1;
             var decision = perceptron.Feedforward(to.Input);
             if (!silent)
             {
                 WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
                 WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
-                WriteResponse(" " + to.Solution.ToString().PadRight(2) + "|");
+                WriteResponse(" " + solution.ToString().PadRight(2) + "|");
                 WriteResponse(" " + decision);
-                WriteResponse(decision == to.Solution ? "" : " [x]");
+                WriteResponse(decision == solution ? "" : " [x]");
                 Console.WriteLine();
             }
-            if (isTrained) isTrained = decision == to.Solution;
+            if (isTrained) isTrained = decision == solution;
         }
         return isTrained;
     }
