@@ -13,6 +13,7 @@ public static class ExperimentRunner
          double step,
          int repetitions,
          double initialWeightsLimit,
+         StepFunctionEnum stepFunction,
          int inputsCount = 2)
     {
         if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
@@ -32,7 +33,7 @@ public static class ExperimentRunner
                 for (int j = 0; j < repetitions; j++)
                 {
                     run++;
-                    p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount);
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction);
                     var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
 
                     if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
@@ -58,6 +59,7 @@ public static class ExperimentRunner
          double step,
          int repetitions,
          double learningRate,
+         StepFunctionEnum stepFunction,
          int inputsCount = 2)
     {
         if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
@@ -77,7 +79,7 @@ public static class ExperimentRunner
                 for (int j = 0; j < repetitions; j++)
                 {
                     run++;
-                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount);
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction);
                     var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
 
                     if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();

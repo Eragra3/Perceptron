@@ -19,7 +19,12 @@ public static class PerceptronTrainer
         andTraingData.Add(t3);
         andTraingData.Add(t4);
     }
-    public static Perceptron CreatePerceptron(double learningRate, double initialWeightLimit, int inputsCount)
+
+    public static Perceptron CreatePerceptron(
+        double learningRate,
+        double initialWeightLimit,
+        int inputsCount,
+        StepFunctionEnum stepFunction)
     {
         if (learningRate <= 0) throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
 
@@ -33,6 +38,11 @@ public static class PerceptronTrainer
         Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias);
 
         return perceptron;
+    }
+
+    public static Perceptron CreatePerceptron(double learningRate, double initialWeightLimit, int inputsCount)
+    {
+        return CreatePerceptron(learningRate, initialWeightLimit, inputsCount, StepFunctionEnum.Unipolar);
     }
 
     public static int TrainPerceptron_And(Perceptron perceptron, bool silent = false)

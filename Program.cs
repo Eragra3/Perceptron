@@ -45,7 +45,7 @@ public class Program
         Console.WriteLine($"{"p".PadRight(10)} (p) - print perceptron data");
         Console.WriteLine($"{"d".PadRight(10)} (d) - print perceptron data");
         Console.WriteLine($"{"test".PadRight(10)} (test) - test and function");
-        Console.WriteLine($"{"train".PadRight(10)} (train) - train perceptrion and function");
+        Console.WriteLine($"{"train".PadRight(10)} (train) - train perceptron and function");
         Console.WriteLine($"{"change".PadRight(10)} (change) - create new perceptron");
         Console.WriteLine($"{"e".PadRight(10)} (e) - run experiment");
         Console.WriteLine($"{"es".PadRight(10)} (es) - toggle silent mode for experiments");
@@ -93,14 +93,18 @@ public class Program
                     PerceptronTrainer.TrainPerceptron_And(perceptron);
                     break;
                 case "change":
-                    WriteResponseLine("learning-rate weights-range");
+                    WriteResponseLine("learning-rate weights-range step-function(uni,bi)");
                     try
                     {
                         var parameters = Prompt().Split(' ');
                         learningRate = double.Parse(parameters[0].Replace('.', ','));
                         initialWeightLimit = double.Parse(parameters[1].Replace('.', ','));
+                        StepFunctionEnum stepFunction;
+                        if (parameters[2] == "uni") stepFunction = StepFunctionEnum.Unipolar;
+                        else if (parameters[2] == "bi") stepFunction = StepFunctionEnum.Bipolar;
+                        else throw new ArgumentException();
 
-                        perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2);
+                        perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction);
                     }
                     catch (System.Exception)
                     {
@@ -108,68 +112,77 @@ public class Program
                     }
                     break;
                 case "e":
-                    WriteResponseLine("learning-rate(lr) weights-range(wr)");
-                    var experiment = Prompt();
-                    if (experiment == "lr" || experiment == "learning-rate")
+                    WriteResponseLine("step-function(uni,bi)");
                     {
-                        try
-                        {
-                            WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
-                            WriteResponseLine("start end step repetitions initialWeightLimit");
-                            var parameters = Prompt().Split(' ');
+                        StepFunctionEnum stepFunction;
+                        var userInput = Prompt();
+                        if (userInput == "uni") stepFunction = StepFunctionEnum.Unipolar;
+                        else if (userInput == "bi") stepFunction = StepFunctionEnum.Bipolar;
+                        else throw new ArgumentException();
 
-                            if (parameters[0] == "d")
+                        WriteResponseLine("learning-rate(lr) weights-range(wr)");
+                        userInput = Prompt();
+                        if (userInput == "lr" || userInput == "learning-rate")
+                        {
+                            try
                             {
-                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 10, 1);
-                            }
-                            else
-                            {
-                                var start = double.Parse(parameters[0].Replace('.', ','));
-                                var end = double.Parse(parameters[1].Replace('.', ','));
-                                var step = double.Parse(parameters[2].Replace('.', ','));
-                                var repetitions = int.Parse(parameters[3]);
-                                initialWeightLimit = double.Parse(parameters[4].Replace('.', ','));
-                                ExperimentRunner.LearningRate(start, end, step, repetitions, initialWeightLimit);
-                            }
-                        }
-                        catch (PerceptronLearnException)
-                        {
-                            WriteErrorLine("Oops. Learning exception.");
-                        }
-                        catch (System.Exception)
-                        {
-                            WriteErrorLine("Invalid parameters");
-                        }
-                    }
-                    else if (experiment == "wr" || experiment == "weights-range")
-                    {
-                        try
-                        {
-                            WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
-                            WriteResponseLine("start end step repetitions learningRate");
-                            var parameters = Prompt().Split(' ');
+                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
+                                WriteResponseLine("start end step repetitions initialWeightLimit");
+                                var parameters = Prompt().Split(' ');
 
-                            if (parameters[0] == "d")
-                            {
-                                ExperimentRunner.WeightsRange(0.1, 1, 0.1, 10, 1);
+                                if (parameters[0] == "d")
+                                {
+                                    ExperimentRunner.LearningRate(0.1, 1, 0.1, 10, 1, stepFunction);
+                                }
+                                else
+                                {
+                                    var start = double.Parse(parameters[0].Replace('.', ','));
+                                    var end = double.Parse(parameters[1].Replace('.', ','));
+                                    var step = double.Parse(parameters[2].Replace('.', ','));
+                                    var repetitions = int.Parse(parameters[3]);
+                                    initialWeightLimit = double.Parse(parameters[4].Replace('.', ','));
+                                    ExperimentRunner.LearningRate(start, end, step, repetitions, initialWeightLimit, stepFunction);
+                                }
                             }
-                            else
+                            catch (PerceptronLearnException)
                             {
-                                var start = double.Parse(parameters[0].Replace('.', ','));
-                                var end = double.Parse(parameters[1].Replace('.', ','));
-                                var step = double.Parse(parameters[2].Replace('.', ','));
-                                var repetitions = int.Parse(parameters[3]);
-                                learningRate = double.Parse(parameters[4].Replace('.', ','));
-                                ExperimentRunner.WeightsRange(start, end, step, repetitions, learningRate);
+                                WriteErrorLine("Oops. Learning exception.");
+                            }
+                            catch (System.Exception)
+                            {
+                                WriteErrorLine("Invalid parameters");
                             }
                         }
-                        catch (PerceptronLearnException)
+                        else if (userInput == "wr" || userInput == "weights-range")
                         {
-                            WriteErrorLine("Oops. Learning exception.");
-                        }
-                        catch (System.Exception)
-                        {
-                            WriteErrorLine("Invalid parameters");
+                            try
+                            {
+                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
+                                WriteResponseLine("start end step repetitions learningRate");
+                                var parameters = Prompt().Split(' ');
+
+                                if (parameters[0] == "d")
+                                {
+                                    ExperimentRunner.WeightsRange(0.1, 1, 0.1, 10, 1, stepFunction);
+                                }
+                                else
+                                {
+                                    var start = double.Parse(parameters[0].Replace('.', ','));
+                                    var end = double.Parse(parameters[1].Replace('.', ','));
+                                    var step = double.Parse(parameters[2].Replace('.', ','));
+                                    var repetitions = int.Parse(parameters[3]);
+                                    learningRate = double.Parse(parameters[4].Replace('.', ','));
+                                    ExperimentRunner.WeightsRange(start, end, step, repetitions, learningRate, stepFunction);
+                                }
+                            }
+                            catch (PerceptronLearnException)
+                            {
+                                WriteErrorLine("Oops. Learning exception.");
+                            }
+                            catch (System.Exception)
+                            {
+                                WriteErrorLine("Invalid parameters");
+                            }
                         }
                     }
                     break;

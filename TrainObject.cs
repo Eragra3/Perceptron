@@ -1,9 +1,9 @@
 public class TrainObject
 {
     public double[] Input;
-    public double Solution;
+    public int Solution;
 
-    public TrainObject(double[] input, double solution)
+    public TrainObject(double[] input, int solution)
     {
         Input = input;
         Solution = solution;
