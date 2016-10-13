@@ -120,7 +120,7 @@ public class Program
 
                             if (parameters[0] == "d")
                             {
-                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 100, 1);
+                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 10, 1);
                             }
                             else
                             {
@@ -143,7 +143,34 @@ public class Program
                     }
                     else if (experiment == "wr" || experiment == "weights-range")
                     {
+                        try
+                        {
+                            WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
+                            WriteResponseLine("start end step repetitions learningRate");
+                            var parameters = Prompt().Split(' ');
 
+                            if (parameters[0] == "d")
+                            {
+                                ExperimentRunner.WeightsRange(0.1, 1, 0.1, 10, 1);
+                            }
+                            else
+                            {
+                                var start = double.Parse(parameters[0].Replace('.', ','));
+                                var end = double.Parse(parameters[1].Replace('.', ','));
+                                var step = double.Parse(parameters[2].Replace('.', ','));
+                                var repetitions = int.Parse(parameters[3]);
+                                learningRate = double.Parse(parameters[4].Replace('.', ','));
+                                ExperimentRunner.WeightsRange(start, end, step, repetitions, learningRate);
+                            }
+                        }
+                        catch (PerceptronLearnException)
+                        {
+                            WriteErrorLine("Oops. Learning exception.");
+                        }
+                        catch (System.Exception)
+                        {
+                            WriteErrorLine("Invalid parameters");
+                        }
                     }
                     break;
                 case "es":

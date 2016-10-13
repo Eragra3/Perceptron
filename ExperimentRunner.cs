@@ -15,7 +15,7 @@ public static class ExperimentRunner
          double initialWeightsLimit,
          int inputsCount = 2)
     {
-        if (start > end || step > Math.Abs(end - start)) throw new ArgumentException();
+        if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
 
         int experimentIndex = 0;
         int run = 0;
@@ -36,7 +36,51 @@ public static class ExperimentRunner
                     var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
 
                     if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
-                    p?.Dump();
+
+                    epochsSum += epochs;
+                    if (!Silent) WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");
+                }
+            }
+            catch (PerceptronLearnException)
+            {
+                WriteErrorLine("Perceptron can't learn with params:");
+                p?.Dump();
+            }
+            var avarageEpochs = epochsSum / run;
+            WriteExperimentLine($"\tavarage epochs - {avarageEpochs}");
+            WriteLine();
+        }
+    }
+
+    public static void WeightsRange(
+        double start,
+         double end,
+         double step,
+         int repetitions,
+         double learningRate,
+         int inputsCount = 2)
+    {
+        if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
+
+        int experimentIndex = 0;
+        int run = 0;
+        int epochsSum = 0;
+        for (double weightsLimit = start; weightsLimit <= end; weightsLimit += step)
+        {
+            experimentIndex++;
+            epochsSum = 0;
+            run = 0;
+            Perceptron p = null;
+            WriteResponseLine($"Experiment - {experimentIndex}");
+            try
+            {
+                for (int j = 0; j < repetitions; j++)
+                {
+                    run++;
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount);
+                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
+
+                    if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
 
                     epochsSum += epochs;
                     if (!Silent) WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");
