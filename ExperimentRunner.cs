@@ -3,6 +3,7 @@ using static ConsoleHelper;
 
 public static class ExperimentRunner
 {
+    public static bool Silent = false;
     ///<summary>
     ///Both start and end are inclusive
     ///</summary>
@@ -35,9 +36,10 @@ public static class ExperimentRunner
                     var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
 
                     if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
+                    p?.Dump();
 
                     epochsSum += epochs;
-                    WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");
+                    if (!Silent) WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");
                 }
             }
             catch (PerceptronLearnException)

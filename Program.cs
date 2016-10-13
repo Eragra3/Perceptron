@@ -48,9 +48,11 @@ public class Program
         Console.WriteLine($"{"train".PadRight(10)} (train) - train perceptrion and function");
         Console.WriteLine($"{"change".PadRight(10)} (change) - create new perceptron");
         Console.WriteLine($"{"e".PadRight(10)} (e) - run experiment");
+        Console.WriteLine($"{"es".PadRight(10)} (es) - toggle silent mode for experiments");
         Console.WriteLine("-".PadRight(20, '-'));
 
         string line;
+        ExperimentRunner.Silent = false;
         while (true)
         {
             line = Prompt();
@@ -118,7 +120,7 @@ public class Program
 
                             if (parameters[0] == "d")
                             {
-                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 10, 1);
+                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 100, 1);
                             }
                             else
                             {
@@ -143,6 +145,10 @@ public class Program
                     {
 
                     }
+                    break;
+                case "es":
+                    ExperimentRunner.Silent = !ExperimentRunner.Silent;
+                    WriteResponseLine($"Experiment runner mode - {(ExperimentRunner.Silent ? "silent" : "verbose")}");
                     break;
                 default:
                     WriteErrorLine("No such command");

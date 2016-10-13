@@ -4,6 +4,8 @@ using static ConsoleHelper;
 
 public static class PerceptronTrainer
 {
+    private static Random _rng = new Random();
+
     public static IList<TrainObject> andTraingData;
     static PerceptronTrainer()
     {
@@ -21,13 +23,12 @@ public static class PerceptronTrainer
     {
         if (learningRate <= 0) throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
 
-        Random rng = new Random();
         double[] initialWeights = new double[inputsCount];
         for (int i = 0; i < initialWeights.Length; i++)
         {
-            initialWeights[i] = initialWeightLimit * (rng.NextDouble() * 2 - 1);
+            initialWeights[i] = initialWeightLimit * (_rng.NextDouble() * 2 - 1);
         }
-        double bias = initialWeightLimit * (rng.NextDouble() * 2 - 1);
+        double bias = initialWeightLimit * (_rng.NextDouble() * 2 - 1);
 
         Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias);
 
