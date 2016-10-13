@@ -19,6 +19,8 @@ public static class PerceptronTrainer
     }
     public static Perceptron CreatePerceptron(double learningRate, double initialWeightLimit, int inputsCount)
     {
+        if (learningRate <= 0) throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
+
         Random rng = new Random();
         double[] initialWeights = new double[inputsCount];
         for (int i = 0; i < initialWeights.Length; i++)
@@ -32,13 +34,14 @@ public static class PerceptronTrainer
         return perceptron;
     }
 
-    public static int TrainPerceptron_And(Perceptron perceptron)
+    public static int TrainPerceptron_And(Perceptron perceptron, bool silent = false)
     {
         bool isTrained = false;
         int epoch = 0;
         while (!isTrained)
         {
-            WriteResponseLine($"Learning epoch - {++epoch}");
+            epoch++;
+            if (!silent) WriteResponseLine($"Learning epoch - {epoch}");
             isTrained = true;
             foreach (var trainObject in andTraingData)
             {
@@ -50,28 +53,31 @@ public static class PerceptronTrainer
             }
             if (epoch > 10000)
             {
-                WriteError("Stopping!");
-                WriteError("Did not learn anything in 10000 epochs!");
+                WriteErrorLine("Stopping!");
+                WriteErrorLine("Did not learn anything in 10000 epochs!");
                 throw new Exception();
             }
         }
         return epoch;
     }
 
-    public static bool Check_And(Perceptron perceptron)
+    public static bool Test_And(Perceptron perceptron, bool silent = false)
     {
         bool isTrained = true;
-        Console.WriteLine($"x1 | x2 | y | decision");
+        if (!silent) Console.WriteLine($"x1 | x2 | y | decision");
         foreach (var to in andTraingData)
         {
             var decision = perceptron.Feedforward(to.Input);
-            WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
-            WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
-            WriteResponse(" " + to.Solution.ToString().PadRight(2) + "|");
-            WriteResponse(" " + decision);
-            WriteResponse(decision == to.Solution ? "" : " [x]");
-            Console.WriteLine();
-            if (isTrained) isTrained = false;
+            if (!silent)
+            {
+                WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
+                WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
+                WriteResponse(" " + to.Solution.ToString().PadRight(2) + "|");
+                WriteResponse(" " + decision);
+                WriteResponse(decision == to.Solution ? "" : " [x]");
+                Console.WriteLine();
+            }
+            if (isTrained) isTrained = decision == to.Solution;
         }
         return isTrained;
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using static ConsoleHelper;
+using static ExperimentRunner;
 
 public class Program
 {
@@ -17,7 +18,7 @@ public class Program
         }
         catch (System.Exception)
         {
-            WriteError("Invalid learning rate param - setting as 0.2");
+            WriteErrorLine("Invalid learning rate param - setting as 0.2");
             learningRate = 0.2;
         }
         Console.WriteLine($"learning rate: {learningRate}");
@@ -29,7 +30,7 @@ public class Program
         }
         catch (System.Exception)
         {
-            WriteError("Invalid initial weights limit - setting as 1");
+            WriteErrorLine("Invalid initial weights limit - setting as 1");
             initialWeightLimit = 0.2;
         }
         Console.WriteLine($"initial weight range: -{initialWeightLimit}:{initialWeightLimit}");
@@ -44,6 +45,7 @@ public class Program
         Console.WriteLine($"{"p".PadRight(10)} (p) - print perceptron data");
         Console.WriteLine($"{"d".PadRight(10)} (d) - print perceptron data");
         Console.WriteLine($"{"test".PadRight(10)} (test) - test and function");
+        Console.WriteLine($"{"train".PadRight(10)} (train) - train perceptrion and function");
         Console.WriteLine($"{"change".PadRight(10)} (change) - create new perceptron");
         Console.WriteLine($"{"e".PadRight(10)} (e) - run experiment");
         Console.WriteLine("-".PadRight(20, '-'));
@@ -73,7 +75,7 @@ public class Program
                     }
                     catch (System.Exception)
                     {
-                        WriteError("Wrong command");
+                        WriteErrorLine("Wrong command");
                     }
                     break;
                 case "p":
@@ -83,7 +85,7 @@ public class Program
                     WriteResponseLine(perceptron.Dump());
                     break;
                 case "test":
-                    PerceptronTrainer.Check_And(perceptron);
+                    PerceptronTrainer.Test_And(perceptron);
                     break;
                 case "train":
                     PerceptronTrainer.TrainPerceptron_And(perceptron);
@@ -100,7 +102,7 @@ public class Program
                     }
                     catch (System.Exception)
                     {
-                        WriteError("Invalid parameters");
+                        WriteErrorLine("Invalid parameters");
                     }
                     break;
                 case "e":
@@ -108,7 +110,34 @@ public class Program
                     var experiment = Prompt();
                     if (experiment == "lr" || experiment == "learning-rate")
                     {
+                        try
+                        {
+                            WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
+                            WriteResponseLine("start end step repetitions initialWeightLimit");
+                            var parameters = Prompt().Split(' ');
 
+                            if (parameters[0] == "d")
+                            {
+                                ExperimentRunner.LearningRate(0.1, 1, 0.1, 10, 1);
+                            }
+                            else
+                            {
+                                var start = double.Parse(parameters[0].Replace('.', ','));
+                                var end = double.Parse(parameters[1].Replace('.', ','));
+                                var step = double.Parse(parameters[2].Replace('.', ','));
+                                var repetitions = int.Parse(parameters[3]);
+                                initialWeightLimit = double.Parse(parameters[4].Replace('.', ','));
+                                ExperimentRunner.LearningRate(start, end, step, repetitions, initialWeightLimit);
+                            }
+                        }
+                        catch (PerceptronLearnException)
+                        {
+                            WriteErrorLine("Oops. Learning exception.");
+                        }
+                        catch (System.Exception)
+                        {
+                            WriteErrorLine("Invalid parameters");
+                        }
                     }
                     else if (experiment == "wr" || experiment == "weights-range")
                     {
@@ -116,7 +145,7 @@ public class Program
                     }
                     break;
                 default:
-                    WriteError("No such command");
+                    WriteErrorLine("No such command");
                     break;
             }
             Console.WriteLine();
