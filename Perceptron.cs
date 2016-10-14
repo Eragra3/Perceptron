@@ -72,7 +72,7 @@ public class Perceptron
         double error;
         if (IsAdaline)
         {
-            error = net - Net(input);
+            error = solution - Net(input);
         }
         else
         {

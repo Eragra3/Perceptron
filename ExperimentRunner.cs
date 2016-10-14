@@ -14,6 +14,8 @@ public static class ExperimentRunner
          int repetitions,
          double initialWeightsLimit,
          StepFunctionEnum stepFunction,
+         bool useAdaline = false,
+         double adalineTreshold = 1,
          int inputsCount = 2)
     {
         if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
@@ -33,10 +35,13 @@ public static class ExperimentRunner
                 for (int j = 0; j < repetitions; j++)
                 {
                     run++;
-                    p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction);
-                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction, useAdaline);
+                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, true);
 
-                    if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
+                    if (!useAdaline)
+                    {
+                        if (!PerceptronTrainer.Test_And(p, true)) throw new PerceptronLearnException();
+                    }
 
                     epochsSum += epochs;
                     if (!Silent) WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");
@@ -60,6 +65,8 @@ public static class ExperimentRunner
          int repetitions,
          double learningRate,
          StepFunctionEnum stepFunction,
+         bool useAdaline = false,
+         double adalineTreshold = 1,
          int inputsCount = 2)
     {
         if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
@@ -79,10 +86,13 @@ public static class ExperimentRunner
                 for (int j = 0; j < repetitions; j++)
                 {
                     run++;
-                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction);
-                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, silent: true);
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, useAdaline);
+                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, true);
 
-                    if (!PerceptronTrainer.Test_And(p, silent: true)) throw new PerceptronLearnException();
+                    if (!useAdaline)
+                    {
+                        if (!PerceptronTrainer.Test_And(p, true)) throw new PerceptronLearnException();
+                    }
 
                     epochsSum += epochs;
                     if (!Silent) WriteExperimentLine($"epochs - {epochs.ToString().PadRight(2)}");

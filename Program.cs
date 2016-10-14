@@ -65,35 +65,35 @@ public class Program
             if (command == "exit") break;
 
             Console.WriteLine();
-            switch (command)
+            try
             {
-                case "t":
-                    try
-                    {
-                        var decision = perceptron.Feedforward(
-                                double.Parse(input[1]),
-                                double.Parse(input[2])
-                                );
-                        WriteResponseLine(decision);
-                    }
-                    catch (System.Exception)
-                    {
-                        WriteErrorLine("Wrong command");
-                    }
-                    break;
-                case "p":
-                    WriteResponseLine(perceptron.Dump());
-                    break;
-                case "d":
-                    WriteResponseLine(perceptron.Dump());
-                    break;
-                case "test":
-                    PerceptronTrainer.Test_And(perceptron);
-                    break;
-                case "train":
-                    var adalineTreshold = 1.0;
-                    try
-                    {
+                switch (command)
+                {
+                    case "t":
+                        try
+                        {
+                            var decision = perceptron.Feedforward(
+                                    double.Parse(input[1]),
+                                    double.Parse(input[2])
+                                    );
+                            WriteResponseLine(decision);
+                        }
+                        catch (System.Exception)
+                        {
+                            WriteErrorLine("Wrong command");
+                        }
+                        break;
+                    case "p":
+                        WriteResponseLine(perceptron.Dump());
+                        break;
+                    case "d":
+                        WriteResponseLine(perceptron.Dump());
+                        break;
+                    case "test":
+                        PerceptronTrainer.Test_And(perceptron);
+                        break;
+                    case "train":
+                        var adalineTreshold = 1.0;
                         if (perceptron.IsAdaline)
                         {
                             WriteResponseLine("Using adaline. Set learning threshold");
@@ -101,55 +101,40 @@ public class Program
                             adalineTreshold = double.Parse(userInput.Replace('.', ','));
                         }
                         PerceptronTrainer.TrainPerceptron_And(perceptron, adalineTreshold);
-                    }
-                    catch (System.Exception)
-                    {
-                        WriteErrorLine("Invalid parameters");
-                    }
-                    break;
-                case "change":
-                    WriteResponseLine("learning-rate weights-range step-function(uni,bi) use-adaline(y,n or nothing)");
-                    try
-                    {
-                        var parameters = Prompt().Split(' ');
-                        learningRate = double.Parse(parameters[0].Replace('.', ','));
-                        initialWeightLimit = double.Parse(parameters[1].Replace('.', ','));
-                        StepFunctionEnum stepFunction;
-                        if (parameters[2] == "uni") stepFunction = StepFunctionEnum.Unipolar;
-                        else if (parameters[2] == "bi") stepFunction = StepFunctionEnum.Bipolar;
-                        else throw new ArgumentException();
-
-                        bool useAdaline = false;
-                        if (parameters[3] == "y") useAdaline = true;
-
-                        perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction, useAdaline);
-                    }
-                    catch (PerceptronLearnException)
-                    {
-
-                    }
-                    catch (System.Exception)
-                    {
-                        WriteErrorLine("Invalid parameters");
-                    }
-                    break;
-                case "e":
-                    WriteResponseLine("step-function(uni,bi)");
-                    {
-                        StepFunctionEnum stepFunction;
-                        var userInput = Prompt();
-                        if (userInput == "uni") stepFunction = StepFunctionEnum.Unipolar;
-                        else if (userInput == "bi") stepFunction = StepFunctionEnum.Bipolar;
-                        else throw new ArgumentException();
-
-                        WriteResponseLine("learning-rate(lr) weights-range(wr) adaline-treshold(at)");
-                        userInput = Prompt();
-                        if (userInput == "lr" || userInput == "learning-rate")
+                        break;
+                    case "change":
                         {
-                            try
+                            WriteResponseLine("learning-rate weights-range step-function(uni,bi) use-adaline(y,n or nothing)");
+                            var parameters = Prompt().Split(' ');
+                            learningRate = double.Parse(parameters[0].Replace('.', ','));
+                            initialWeightLimit = double.Parse(parameters[1].Replace('.', ','));
+                            StepFunctionEnum stepFunction;
+                            if (parameters[2] == "uni") stepFunction = StepFunctionEnum.Unipolar;
+                            else if (parameters[2] == "bi") stepFunction = StepFunctionEnum.Bipolar;
+                            else throw new ArgumentException();
+
+                            bool useAdaline = false;
+                            if (parameters[3] == "y") useAdaline = true;
+
+                            perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction, useAdaline);
+                            break;
+                        }
+                    case "e":
+                        {
+                            WriteResponseLine("step-function(uni,bi)");
+                            var userInput = Prompt();
+
+                            StepFunctionEnum stepFunction;
+                            if (userInput == "uni") stepFunction = StepFunctionEnum.Unipolar;
+                            else if (userInput == "bi") stepFunction = StepFunctionEnum.Bipolar;
+                            else throw new ArgumentException();
+
+                            WriteResponseLine("learning-rate(lr) weights-range(wr) adaline-treshold(at)");
+                            userInput = Prompt();
+                            if (userInput == "lr" || userInput == "learning-rate")
                             {
-                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1");
-                                WriteResponseLine("start end step repetitions initialWeightLimit");
+                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 1 [n] [1]");
+                                WriteResponseLine("start end step repetitions initialWeightLimit [useAdaline] [adalineTreshold]");
                                 var parameters = Prompt().Split(' ');
 
                                 if (parameters[0] == "d")
@@ -163,24 +148,18 @@ public class Program
                                     var step = double.Parse(parameters[2].Replace('.', ','));
                                     var repetitions = int.Parse(parameters[3]);
                                     initialWeightLimit = double.Parse(parameters[4].Replace('.', ','));
-                                    ExperimentRunner.LearningRate(start, end, step, repetitions, initialWeightLimit, stepFunction);
+
+                                    bool useAdaline = false;
+                                    if (parameters[5] == "y") useAdaline = true;
+
+                                    adalineTreshold = double.Parse(parameters[6]?.Replace('.', ',') ?? "0");
+                                    ExperimentRunner.LearningRate(start, end, step, repetitions, initialWeightLimit, stepFunction, useAdaline, adalineTreshold);
                                 }
                             }
-                            catch (PerceptronLearnException)
+                            else if (userInput == "wr" || userInput == "weights-range")
                             {
-                                WriteErrorLine("Oops. Learning exception.");
-                            }
-                            catch (System.Exception)
-                            {
-                                WriteErrorLine("Invalid parameters");
-                            }
-                        }
-                        else if (userInput == "wr" || userInput == "weights-range")
-                        {
-                            try
-                            {
-                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 0.2");
-                                WriteResponseLine("start end step repetitions learningRate");
+                                WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 0.2 [n] [1]");
+                                WriteResponseLine("start end step repetitions learningRate useAdaline adalineTreshold");
                                 var parameters = Prompt().Split(' ');
 
                                 if (parameters[0] == "d")
@@ -194,21 +173,16 @@ public class Program
                                     var step = double.Parse(parameters[2].Replace('.', ','));
                                     var repetitions = int.Parse(parameters[3]);
                                     learningRate = double.Parse(parameters[4].Replace('.', ','));
-                                    ExperimentRunner.WeightsRange(start, end, step, repetitions, learningRate, stepFunction);
+
+                                    bool useAdaline = false;
+                                    if (parameters[5] == "y") useAdaline = true;
+
+                                    adalineTreshold = double.Parse(parameters[6]?.Replace('.', ',') ?? "0");
+
+                                    ExperimentRunner.WeightsRange(start, end, step, repetitions, learningRate, stepFunction, useAdaline, adalineTreshold);
                                 }
                             }
-                            catch (PerceptronLearnException)
-                            {
-                                WriteErrorLine("Oops. Learning exception.");
-                            }
-                            catch (System.Exception)
-                            {
-                                WriteErrorLine("Invalid parameters");
-                            }
-                        }
-                        else if (userInput == "at" || userInput == "adaline-treshold")
-                        {
-                            try
+                            else if (userInput == "at" || userInput == "adaline-treshold")
                             {
                                 WriteResponseLine("type in {d} to use defaults 0.1 1 0.1 10 0.2 1");
                                 WriteResponseLine("start end step repetitions learningRate weightslimit");
@@ -225,33 +199,34 @@ public class Program
                                     var step = double.Parse(parameters[2].Replace('.', ','));
                                     var repetitions = int.Parse(parameters[3]);
                                     learningRate = double.Parse(parameters[4].Replace('.', ','));
-                                    var weightsLimit = double.Parse(parameters[4].Replace('.', ','));
+                                    var weightsLimit = double.Parse(parameters[5].Replace('.', ','));
                                     ExperimentRunner
                                     .AdalineTreshold(start, end, step, repetitions, learningRate, weightsLimit, stepFunction);
                                 }
                             }
-                            catch (PerceptronLearnException)
-                            {
-                                WriteErrorLine("Oops. Learning exception.");
-                            }
-                            catch (System.Exception)
-                            {
-                                WriteErrorLine("Invalid parameters");
-                            }
+                            break;
                         }
-                    }
-                    break;
-                case "es":
-                    ExperimentRunner.Silent = !ExperimentRunner.Silent;
-                    WriteResponseLine($"Experiment runner mode - {(ExperimentRunner.Silent ? "silent" : "verbose")}");
-                    break;
-                case "octave":
-                    var octaveCode = perceptron?.GenerateOctaveCode();
-                    WriteResponseLine(octaveCode);
-                    break;
-                default:
-                    WriteErrorLine("No such command");
-                    break;
+                    case "es":
+                        ExperimentRunner.Silent = !ExperimentRunner.Silent;
+                        WriteResponseLine($"Experiment runner mode - {(ExperimentRunner.Silent ? "silent" : "verbose")}");
+                        break;
+                    case "octave":
+                        var octaveCode = perceptron?.GenerateOctaveCode();
+                        WriteResponseLine(octaveCode);
+                        break;
+                    default:
+                        WriteErrorLine("No such command");
+                        break;
+                }
+
+            }
+            catch (PerceptronLearnException)
+            {
+                WriteErrorLine("Oops. Learning exception.");
+            }
+            catch (System.Exception)
+            {
+                WriteErrorLine("Invalid parameters");
             }
             Console.WriteLine();
         }
