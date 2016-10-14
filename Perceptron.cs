@@ -19,7 +19,7 @@ public class Perceptron
         bool isAdaline
         ) : this(weights, learningRate, bias, stepFunction)
     {
-        IsAdaline = true;
+        IsAdaline = isAdaline;
     }
     public Perceptron(
         double[] weights,

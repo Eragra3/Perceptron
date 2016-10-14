@@ -122,7 +122,6 @@ public class Program
                         bool useAdaline = false;
                         if (parameters[3] == "y") useAdaline = true;
 
-
                         perceptron = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightLimit, 2, stepFunction, useAdaline);
                     }
                     catch (PerceptronLearnException)
