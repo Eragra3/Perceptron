@@ -1,151 +1,142 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static ConsoleHelper;
 
-public static class PerceptronTrainer
+namespace Perceptron
 {
-    private static Random _rng = new Random();
-
-    public static IList<TrainObject> andTraingData;
-    static PerceptronTrainer()
+    public static class PerceptronTrainer
     {
-        Func<double, double, double> andFunction = (x, y) => x + y - 1;
-        andTraingData = new List<TrainObject>(10);
-        TrainObject t1 = new TrainObject(new double[] { 0, 0 }, 0, andFunction(0, 0));
-        TrainObject t2 = new TrainObject(new double[] { 0, 1 }, 0, andFunction(0, 1));
-        TrainObject t3 = new TrainObject(new double[] { 1, 0 }, 0, andFunction(1, 0));
-        TrainObject t4 = new TrainObject(new double[] { 1, 1 }, 1, andFunction(1, 1));
-        andTraingData.Add(t1);
-        andTraingData.Add(t2);
-        andTraingData.Add(t3);
-        andTraingData.Add(t4);
-    }
+        private static readonly Random Rng = new Random();
 
-    public static Perceptron CreatePerceptron(
-        double learningRate,
-        double initialWeightLimit,
-        int inputsCount,
-        StepFunctionEnum stepFunction,
-        bool useAdaline)
-    {
-        if (learningRate <= 0) throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
-
-        double[] initialWeights = new double[inputsCount];
-        for (int i = 0; i < initialWeights.Length; i++)
+        public static IList<TrainObject> andTraingData;
+        static PerceptronTrainer()
         {
-            initialWeights[i] = initialWeightLimit * (_rng.NextDouble() * 2 - 1);
+            andTraingData = new List<TrainObject>(10);
+            TrainObject t1 = new TrainObject(new double[] { 0, 0 }, 0);
+            TrainObject t2 = new TrainObject(new double[] { 0, 1 }, 0);
+            TrainObject t3 = new TrainObject(new double[] { 1, 0 }, 0);
+            TrainObject t4 = new TrainObject(new double[] { 1, 1 }, 1);
+            andTraingData.Add(t1);
+            andTraingData.Add(t2);
+            andTraingData.Add(t3);
+            andTraingData.Add(t4);
         }
-        double bias = initialWeightLimit * (_rng.NextDouble() * 2 - 1);
 
-        Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias, stepFunction, useAdaline);
-
-        return perceptron;
-    }
-    public static Perceptron CreatePerceptron(
-        double learningRate,
-        double initialWeightLimit,
-        int inputsCount,
-        StepFunctionEnum stepFunction)
-    {
-        return CreatePerceptron(learningRate, initialWeightLimit, inputsCount, stepFunction, false);
-    }
-
-    public static Perceptron CreatePerceptron(double learningRate, double initialWeightLimit, int inputsCount)
-    {
-        return CreatePerceptron(learningRate, initialWeightLimit, inputsCount, StepFunctionEnum.Unipolar);
-    }
-
-    public static int TrainPerceptron_And(Perceptron perceptron, double adalineThreshold = 1, bool silent = false)
-    {
-        bool isTrained = false;
-        int epoch = 0;
-        if (perceptron.IsAdaline)
+        public static Perceptron CreatePerceptron(
+            double learningRate,
+            double initialWeightLimit,
+            int inputsCount,
+            StepFunctionEnum stepFunction,
+            bool useAdaline)
         {
-            if (!silent) WriteResponseLine($"Using adaline, error treshold - {adalineThreshold}");
-            double errorSum;
-            do
+            if (learningRate <= 0)
+                throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
+
+            double[] initialWeights = new double[inputsCount];
+            for (int i = 0; i < initialWeights.Length; i++)
             {
-                epoch++;
-                errorSum = 0;
-                if (!silent) WriteResponse($"Learning epoch - {epoch}");
-                foreach (var trainObject in andTraingData.Shuffle())
-                {
-                    errorSum += Math.Abs(perceptron.Train(trainObject));
-                }
-
-                if (!silent) WriteResponseLine($" current error - {errorSum}");
-
-                if (epoch > 10000)
-                {
-                    WriteErrorLine("Stopping!");
-                    WriteErrorLine("Did not learn nothing in 10000 epochs!");
-                    WriteErrorLine("Using adaline, current values: error-{error} > threshold-{adalineThreshold}");
-                    throw new Exception();
-                }
+                initialWeights[i] = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
             }
-            while (errorSum > adalineThreshold);
+            double bias = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
+
+            Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias, stepFunction, useAdaline);
+
+            return perceptron;
         }
-        else
+
+        public static int TrainPerceptron_And(Perceptron perceptron, double adalineThreshold = 1, bool silent = false)
         {
-            while (!isTrained)
+            bool isTrained = false;
+            int epoch = 0;
+            if (perceptron.IsAdaline)
             {
-                epoch++;
-                if (!silent) WriteResponseLine($"Learning epoch - {epoch}");
-                isTrained = true;
-                foreach (var trainObject in andTraingData)
+                if (!silent) ConsoleHelper.WriteResponseLine($"Using adaline, error treshold - {adalineThreshold}");
+                double errorSum;
+                do
                 {
-                    var error = perceptron.Train(trainObject);
-                    if (error != 0)
+                    epoch++;
+                    errorSum = 0;
+                    if (!silent) ConsoleHelper.WriteResponse($"Learning epoch - {epoch}");
+                    foreach (var trainObject in andTraingData.Shuffle())
                     {
-                        isTrained = false;
+                        errorSum += Math.Pow(perceptron.Train(trainObject), 2);
+                    }
+
+                    errorSum /= andTraingData.Count;
+
+                    if (!silent) ConsoleHelper.WriteResponseLine($" current error - {errorSum}");
+
+                    if (epoch > 10000)
+                    {
+                        ConsoleHelper.WriteErrorLine("Stopping!");
+                        ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
+                        ConsoleHelper.WriteErrorLine("Using adaline, current values: error-{error} > threshold-{adalineThreshold}");
+                        throw new Exception();
                     }
                 }
-                if (epoch > 10000)
+                while ((errorSum) > adalineThreshold);
+            }
+            else
+            {
+                while (!isTrained)
                 {
-                    WriteErrorLine("Stopping!");
-                    WriteErrorLine("Did not learn nothing in 10000 epochs!");
-                    throw new Exception();
+                    epoch++;
+                    if (!silent) ConsoleHelper.WriteResponseLine($"Learning epoch - {epoch}");
+                    isTrained = true;
+                    foreach (var trainObject in andTraingData)
+                    {
+                        var error = perceptron.Train(trainObject);
+                        if (error != 0)
+                        {
+                            isTrained = false;
+                        }
+                    }
+                    if (epoch > 10000)
+                    {
+                        ConsoleHelper.WriteErrorLine("Stopping!");
+                        ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
+                        throw new Exception();
+                    }
                 }
             }
+            return epoch;
         }
-        return epoch;
-    }
 
-    public static bool Test_And(Perceptron perceptron, bool silent = false)
-    {
-        bool isTrained = true;
-        if (!silent) Console.WriteLine($"x1 | x2 | y | decision");
-        foreach (var to in andTraingData)
+        public static bool Test_And(Perceptron perceptron, bool silent = false)
         {
-            var solution = to.Solution;
-            if (perceptron.IsBipolar && solution == 0) solution = -1;
-            var decision = perceptron.Feedforward(to.Input);
-            if (!silent)
+            bool isTrained = true;
+            if (!silent) Console.WriteLine($"x1 | x2 | y | decision");
+            foreach (var to in andTraingData)
             {
-                WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
-                WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
-                WriteResponse(" " + solution.ToString().PadRight(2) + "|");
-                WriteResponse(" " + decision);
-                WriteResponse(decision == solution ? "" : " [x]");
-                Console.WriteLine();
+                var solution = to.Solution;
+                if (perceptron.IsBipolar && solution == 0) solution = -1;
+                var decision = perceptron.Feedforward(to.Input);
+                if (!silent)
+                {
+                    ConsoleHelper.WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
+                    ConsoleHelper.WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
+                    ConsoleHelper.WriteResponse(" " + solution.ToString().PadRight(2) + "|");
+                    ConsoleHelper.WriteResponse(" " + decision);
+                    ConsoleHelper.WriteResponse(decision == solution ? "" : " [x]");
+                    Console.WriteLine();
+                }
+                if (isTrained) isTrained = decision == solution;
             }
-            if (isTrained) isTrained = decision == solution;
+            return isTrained;
         }
-        return isTrained;
-    }
 
-    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
-    {
-        T[] elements = source.ToArray();
-        for (int i = elements.Length - 1; i >= 0; i--)
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            // Swap element "i" with a random earlier element it (or itself)
-            // ... except we don't really need to swap it fully, as we can
-            // return it immediately, and afterwards it's irrelevant.
-            int swapIndex = _rng.Next(i + 1);
-            yield return elements[swapIndex];
-            elements[swapIndex] = elements[i];
+            T[] elements = source.ToArray();
+            for (int i = elements.Length - 1; i >= 0; i--)
+            {
+                // Swap element "i" with a random earlier element it (or itself)
+                // ... except we don't really need to swap it fully, as we can
+                // return it immediately, and afterwards it's irrelevant.
+                int swapIndex = Rng.Next(i + 1);
+                yield return elements[swapIndex];
+                elements[swapIndex] = elements[i];
+            }
         }
     }
 }

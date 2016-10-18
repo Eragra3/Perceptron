@@ -1,13 +1,14 @@
-public class TrainObject
+namespace Perceptron
 {
-    public double[] Input;
-    public int Solution;
-    public double Net;
-
-    public TrainObject(double[] input, int solution, double net)
+    public class TrainObject
     {
-        Input = input;
-        Solution = solution;
-        Net = net;
+        public double[] Input;
+        public int Solution;
+
+        public TrainObject(double[] input, int solution)
+        {
+            Input = input;
+            Solution = solution;
+        }
     }
 }
