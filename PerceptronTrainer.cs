@@ -130,7 +130,6 @@ namespace Perceptron
                 }
                 if (isTrained) isTrained = decision == solution;
             }
-            Console.WriteLine();
             return isTrained;
         }
 

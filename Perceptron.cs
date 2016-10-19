@@ -19,7 +19,9 @@ namespace Perceptron
         [JsonProperty]
         private readonly bool _isAdaline;
 
+        [JsonIgnore]
         public bool IsAdaline => _isAdaline;
+        [JsonIgnore]
         public bool IsBipolar => _stepFunction == StepFunction.Bipolar;
 
         public Perceptron(
@@ -139,16 +141,14 @@ namespace Perceptron
 
         public string ToJson()
         {
-            var sb = new StringBuilder("{");
-            sb.AppendLine($"\tlearningRate: {_learningRate},");
-            sb.AppendLine($"\tstepFunction: {_stepFunction},");
-            sb.AppendLine($"\tisAdaline: {_isAdaline},");
-            var weights = _weights.Aggregate("", (acc, w) => acc + $"{w.ToString(CultureInfo.InvariantCulture)}, ");
-            weights = weights.Remove(weights.Length - 2);
-            sb.AppendLine($"\tweights: [{weights}],");
-            sb.AppendLine($"\tbias: [{_bias}]");
-            sb.AppendLine("}");
-            return sb.ToString();
+            var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+            return json;
+        }
+
+        public static Perceptron FromJson(string json)
+        {
+            var perceptron = JsonConvert.DeserializeObject<Perceptron>(json);
+            return perceptron;
         }
     }
 
