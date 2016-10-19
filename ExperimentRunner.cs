@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Perceptron
 {
     public static class ExperimentRunner
     {
-        public static bool Silent = false;
         ///<summary>
         ///Both start and end are inclusive
         ///</summary>
@@ -14,35 +15,44 @@ namespace Perceptron
             double step,
             int repetitions,
             double initialWeightsLimit,
-            StepFunctionEnum stepFunction,
+            StepFunction stepFunction,
+            int inputsCount,
             bool useAdaline = false,
-            double adalineTreshold = 1,
-            int inputsCount = 2)
+            double adalineThreshold = 1,
+            bool verbose = false
+            )
         {
             if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
 
+            CsvPrinter.DumpParams(
+                new KeyValuePair<string, object>("start", start),
+                new KeyValuePair<string, object>("end", end),
+                new KeyValuePair<string, object>("step", step),
+                new KeyValuePair<string, object>("repetitions", repetitions),
+                new KeyValuePair<string, object>("initialWeightsLimit", initialWeightsLimit),
+                new KeyValuePair<string, object>("stepFunction", stepFunction),
+                new KeyValuePair<string, object>("inputsCount", inputsCount),
+                new KeyValuePair<string, object>("useAdalvine", useAdaline),
+                new KeyValuePair<string, object>("adalineThreshold", adalineThreshold),
+                new KeyValuePair<string, object>("verbose", verbose)
+                );
+            CsvPrinter.DumpHeaderLine("n", "avg epochs");
+
             int experimentIndex = 0;
-            int run = 0;
-            int epochsSum = 0;
             for (double learningRate = start; learningRate <= end; learningRate += step)
             {
                 experimentIndex++;
-                epochsSum = 0;
-                run = 0;
+                var epochsSum = 0;
+                var run = 0;
                 Perceptron p = null;
-                ConsoleHelper.WriteResponseLine($"Experiment - {experimentIndex}");
+                if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
                 try
                 {
                     for (int j = 0; j < repetitions; j++)
                     {
                         run++;
                         p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction, useAdaline);
-                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, true);
-
-                        if (!useAdaline)
-                        {
-                            if (!PerceptronTrainer.Test_And(p, true)) throw new PerceptronLearnException();
-                        }
+                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
 
                         epochsSum += epochs;
                     }
@@ -53,8 +63,7 @@ namespace Perceptron
                     p?.Dump();
                 }
                 var avarageEpochs = epochsSum / run;
-                ConsoleHelper.WriteExperimentLine($"\tavarage epochs - {avarageEpochs}");
-                ConsoleHelper.WriteLine();
+                CsvPrinter.DumpLine(experimentIndex, avarageEpochs);
             }
         }
 
@@ -64,35 +73,44 @@ namespace Perceptron
             double step,
             int repetitions,
             double learningRate,
-            StepFunctionEnum stepFunction,
+            StepFunction stepFunction,
+            int inputsCount,
             bool useAdaline = false,
-            double adalineTreshold = 1,
-            int inputsCount = 2)
+            double adalineThreshold = 1,
+            bool verbose = false
+            )
         {
             if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
 
+            CsvPrinter.DumpParams(
+                new KeyValuePair<string, object>("start", start),
+                new KeyValuePair<string, object>("end", end),
+                new KeyValuePair<string, object>("step", step),
+                new KeyValuePair<string, object>("repetitions", repetitions),
+                new KeyValuePair<string, object>("learningRate", learningRate),
+                new KeyValuePair<string, object>("stepFunction", stepFunction),
+                new KeyValuePair<string, object>("inputsCount", inputsCount),
+                new KeyValuePair<string, object>("useAdalvine", useAdaline),
+                new KeyValuePair<string, object>("adalineThreshold", adalineThreshold),
+                new KeyValuePair<string, object>("verbose", verbose)
+                );
+            CsvPrinter.DumpHeaderLine("n", "avg epochs");
+
             int experimentIndex = 0;
-            int run = 0;
-            int epochsSum = 0;
             for (double weightsLimit = start; weightsLimit <= end; weightsLimit += step)
             {
                 experimentIndex++;
-                epochsSum = 0;
-                run = 0;
+                var epochsSum = 0;
+                var run = 0;
                 Perceptron p = null;
-                ConsoleHelper.WriteResponseLine($"Experiment - {experimentIndex}");
+                if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
                 try
                 {
                     for (int j = 0; j < repetitions; j++)
                     {
                         run++;
                         p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, useAdaline);
-                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, true);
-
-                        if (!useAdaline)
-                        {
-                            if (!PerceptronTrainer.Test_And(p, true)) throw new PerceptronLearnException();
-                        }
+                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
 
                         epochsSum += epochs;
                     }
@@ -103,8 +121,7 @@ namespace Perceptron
                     p?.Dump();
                 }
                 var avarageEpochs = epochsSum / run;
-                ConsoleHelper.WriteExperimentLine($"\tavarage epochs - {avarageEpochs}");
-                ConsoleHelper.WriteLine();
+                CsvPrinter.DumpLine(experimentIndex, avarageEpochs);
             }
 
         }
@@ -116,28 +133,40 @@ namespace Perceptron
             int repetitions,
             double learningRate,
             double weightsLimit,
-            StepFunctionEnum stepFunction,
-            int inputsCount = 2)
+            StepFunction stepFunction,
+            int inputsCount,
+            bool verbose = false)
         {
             if (start > end || step > Math.Abs(end - start) || step == 0) throw new ArgumentException();
 
+            CsvPrinter.DumpParams(
+                new KeyValuePair<string, object>("start", start),
+                new KeyValuePair<string, object>("end", end),
+                new KeyValuePair<string, object>("step", step),
+                new KeyValuePair<string, object>("repetitions", repetitions),
+                new KeyValuePair<string, object>("weightsLimit", weightsLimit),
+                new KeyValuePair<string, object>("learningRate", learningRate),
+                new KeyValuePair<string, object>("stepFunction", stepFunction),
+                new KeyValuePair<string, object>("inputsCount", inputsCount),
+                new KeyValuePair<string, object>("verbose", verbose)
+                );
+            CsvPrinter.DumpHeaderLine("n", "avg epochs", "final error");
+
             int experimentIndex = 0;
-            int run = 0;
-            int epochsSum = 0;
             for (double adalineTreshold = start; adalineTreshold <= end; adalineTreshold += step)
             {
                 experimentIndex++;
-                epochsSum = 0;
-                run = 0;
+                var epochsSum = 0;
+                var run = 0;
                 Perceptron p = null;
-                ConsoleHelper.WriteResponseLine($"Experiment - {experimentIndex}");
+                if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
                 try
                 {
                     for (int j = 0; j < repetitions; j++)
                     {
                         run++;
                         p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, true);
-                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, true);
+                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, verbose);
 
                         epochsSum += epochs;
                     }
@@ -148,8 +177,8 @@ namespace Perceptron
                     p?.Dump();
                 }
                 var avarageEpochs = epochsSum / run;
-                ConsoleHelper.WriteExperimentLine($"\tavarage epochs - {avarageEpochs}");
-                ConsoleHelper.WriteLine();
+                var currentError = PerceptronTrainer.GetAdalineError(p);
+                CsvPrinter.DumpLine(experimentIndex, avarageEpochs, currentError);
             }
 
         }
@@ -157,6 +186,13 @@ namespace Perceptron
         public class PerceptronLearnException : Exception
         {
 
+        }
+
+        public enum ExperimentType
+        {
+            LearningRate,
+            InitialWeights,
+            AdalineThreshold
         }
     }
 }

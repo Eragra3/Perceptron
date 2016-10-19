@@ -26,7 +26,7 @@ namespace Perceptron
             double learningRate,
             double initialWeightLimit,
             int inputsCount,
-            StepFunctionEnum stepFunction,
+            StepFunction stepFunction,
             bool useAdaline)
         {
             if (learningRate <= 0)
@@ -44,19 +44,23 @@ namespace Perceptron
             return perceptron;
         }
 
-        public static int TrainPerceptron_And(Perceptron perceptron, double adalineThreshold = 1, bool silent = false)
+        public static int TrainPerceptron_And(
+            Perceptron perceptron,
+            double adalineThreshold = 1,
+            bool verbose = false
+            )
         {
             bool isTrained = false;
             int epoch = 0;
             if (perceptron.IsAdaline)
             {
-                if (!silent) ConsoleHelper.WriteResponseLine($"Using adaline, error treshold - {adalineThreshold}");
+                if (verbose) ConsoleHelper.WriteYellowLine($"Using adaline, error treshold - {adalineThreshold}");
                 double errorSum;
                 do
                 {
                     epoch++;
                     errorSum = 0;
-                    if (!silent) ConsoleHelper.WriteResponse($"Learning epoch - {epoch}");
+                    if (verbose) ConsoleHelper.WriteYellow($"Learning epoch - {epoch}");
                     foreach (var trainObject in andTraingData.Shuffle())
                     {
                         errorSum += Math.Pow(perceptron.Train(trainObject), 2);
@@ -64,29 +68,29 @@ namespace Perceptron
 
                     errorSum /= andTraingData.Count;
 
-                    if (!silent) ConsoleHelper.WriteResponseLine($" current error - {errorSum}");
+                    if (verbose) ConsoleHelper.WriteLine($" current error - {errorSum}");
 
                     if (epoch > 10000)
                     {
                         ConsoleHelper.WriteErrorLine("Stopping!");
                         ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
-                        ConsoleHelper.WriteErrorLine("Using adaline, current values: error-{error} > threshold-{adalineThreshold}");
-                        throw new Exception();
+                        ConsoleHelper.WriteErrorLine($"Using adaline, current values: error-{errorSum} > threshold-{adalineThreshold}");
+                        throw new ExperimentRunner.PerceptronLearnException();
                     }
                 }
-                while ((errorSum) > adalineThreshold);
+                while (errorSum > adalineThreshold);
             }
             else
             {
                 while (!isTrained)
                 {
                     epoch++;
-                    if (!silent) ConsoleHelper.WriteResponseLine($"Learning epoch - {epoch}");
+                    if (verbose) ConsoleHelper.WriteLine($"Learning epoch - {epoch}");
                     isTrained = true;
                     foreach (var trainObject in andTraingData)
                     {
-                        var error = perceptron.Train(trainObject);
-                        if (error != 0)
+                        var error = Math.Abs(perceptron.Train(trainObject));
+                        if (error > 0.000001)
                         {
                             isTrained = false;
                         }
@@ -95,34 +99,53 @@ namespace Perceptron
                     {
                         ConsoleHelper.WriteErrorLine("Stopping!");
                         ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
-                        throw new Exception();
+                        throw new ExperimentRunner.PerceptronLearnException();
                     }
                 }
             }
             return epoch;
         }
 
-        public static bool Test_And(Perceptron perceptron, bool silent = false)
+        public static bool Test_And(Perceptron perceptron, bool verbose = false)
         {
             bool isTrained = true;
-            if (!silent) Console.WriteLine($"x1 | x2 | y | decision");
+            if (verbose)
+            {
+                ConsoleHelper.WriteYellowLine("Testing perceptron for and function");
+                ConsoleHelper.WriteLine("x1 | x2 | y | decision");
+            }
             foreach (var to in andTraingData)
             {
                 var solution = to.Solution;
                 if (perceptron.IsBipolar && solution == 0) solution = -1;
                 var decision = perceptron.Feedforward(to.Input);
-                if (!silent)
+                if (verbose)
                 {
-                    ConsoleHelper.WriteResponse(to.Input[0].ToString().PadRight(3) + "|");
-                    ConsoleHelper.WriteResponse(" " + to.Input[1].ToString().PadRight(3) + "|");
-                    ConsoleHelper.WriteResponse(" " + solution.ToString().PadRight(2) + "|");
-                    ConsoleHelper.WriteResponse(" " + decision);
-                    ConsoleHelper.WriteResponse(decision == solution ? "" : " [x]");
-                    Console.WriteLine();
+                    ConsoleHelper.Write(to.Input[0].ToString().PadRight(3) + "|");
+                    ConsoleHelper.Write(" " + to.Input[1].ToString().PadRight(3) + "|");
+                    ConsoleHelper.Write(" " + solution.ToString().PadRight(2) + "|");
+                    ConsoleHelper.Write(" " + decision);
+                    ConsoleHelper.Write(decision == solution ? "" : " [x]");
+                    ConsoleHelper.WriteLine();
                 }
                 if (isTrained) isTrained = decision == solution;
             }
+            Console.WriteLine();
             return isTrained;
+        }
+
+        public static double GetAdalineError(Perceptron perceptron)
+        {
+            if (!perceptron.IsAdaline) return Double.NaN;
+
+            double errorSum = 0;
+            foreach (var trainObject in andTraingData.Shuffle())
+            {
+                errorSum += Math.Pow(perceptron.Train(trainObject), 2);
+            }
+
+            errorSum /= andTraingData.Count;
+            return errorSum;
         }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)

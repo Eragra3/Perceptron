@@ -1,25 +1,32 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Perceptron
 {
     public class Perceptron
     {
+        [JsonProperty]
         private double[] _weights;
+        [JsonProperty]
         private double _learningRate;
+        [JsonProperty]
         private double _bias;
-        private StepFunctionEnum _stepFunction;
+        [JsonProperty]
+        private StepFunction _stepFunction;
+        [JsonProperty]
         private readonly bool _isAdaline;
 
         public bool IsAdaline => _isAdaline;
-        public bool IsBipolar => _stepFunction == StepFunctionEnum.Bipolar;
+        public bool IsBipolar => _stepFunction == StepFunction.Bipolar;
 
         public Perceptron(
             double[] weights,
             double learningRate,
             double bias,
-            StepFunctionEnum stepFunction,
+            StepFunction stepFunction,
             bool isAdaline
             )
         {
@@ -43,7 +50,7 @@ namespace Perceptron
 
         public int Step(double sum)
         {
-            if (_stepFunction == StepFunctionEnum.Bipolar) return sum >= 0 ? 1 : -1;
+            if (_stepFunction == StepFunction.Bipolar) return sum >= 0 ? 1 : -1;
             return sum >= 0 ? 1 : 0;
         }
 
@@ -101,7 +108,7 @@ namespace Perceptron
             sb.AppendLine($"{"step function".PadRight(15)} : {_stepFunction}");
             sb.AppendLine($"{"adaline".PadRight(15)} : {IsAdaline}");
             sb.AppendLine($"{"bias".PadRight(15)} : {_bias}");
-            var weights = _weights.Aggregate("", (acc, w) => acc += Math.Round(w, 4).ToString() + ", ");
+            var weights = _weights.Aggregate("", (acc, w) => acc + (Math.Round(w, 4).ToString(CultureInfo.InvariantCulture) + ", "));
             sb.AppendLine($"{"weights".PadRight(15)} : {weights}");
 
             return sb.ToString();
@@ -119,19 +126,33 @@ namespace Perceptron
             for (var i = 0; i < _weights.Length; i++)
             {
                 var weight = _weights[i];
-                sb.Append(Math.Round(weight, 4).ToString().Replace(',', '.'));
+                sb.Append(Math.Round(weight, 4).ToString(CultureInfo.InvariantCulture).Replace(',', '.'));
                 sb.Append("*x" + i);
                 if (i + i < _weights.Length) sb.Append("+");
             }
             sb.Append("+");
-            sb.Append(Math.Round(_bias, 4).ToString().Replace(',', '.'));
+            sb.Append(Math.Round(_bias, 4).ToString(CultureInfo.InvariantCulture).Replace(',', '.'));
             sb.Append(";ezplot(f,[0,1]);");
             sb.Append("grid on;");
             return sb.ToString();
         }
+
+        public string ToJson()
+        {
+            var sb = new StringBuilder("{");
+            sb.AppendLine($"\tlearningRate: {_learningRate},");
+            sb.AppendLine($"\tstepFunction: {_stepFunction},");
+            sb.AppendLine($"\tisAdaline: {_isAdaline},");
+            var weights = _weights.Aggregate("", (acc, w) => acc + $"{w.ToString(CultureInfo.InvariantCulture)}, ");
+            weights = weights.Remove(weights.Length - 2);
+            sb.AppendLine($"\tweights: [{weights}],");
+            sb.AppendLine($"\tbias: [{_bias}]");
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
     }
 
-    public enum StepFunctionEnum
+    public enum StepFunction
     {
         Unipolar,
         Bipolar
