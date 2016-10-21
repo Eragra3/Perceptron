@@ -173,7 +173,7 @@ namespace Perceptron
                         Console.WriteLine(p.Feedforward(input));
                     }
 
-                    if (testSubOptions.Octave) Console.WriteLine(p.GenerateOctaveCode());
+                    if (testSubOptions.Octave) Console.Write(p.GenerateOctaveCode());
 
                     break;
                 default:
