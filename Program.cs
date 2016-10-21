@@ -85,7 +85,7 @@ namespace Perceptron
                 case "experiment":
                     var experimentSubOptions = (ExperimentSubOptions)invokedSubOptions;
 
-                    //if (!experimentSubOptions.Validate()) Environment.Exit(Parser.DefaultExitCodeFail);
+                    if (!experimentSubOptions.Validate()) Environment.Exit(Parser.DefaultExitCodeFail);
 
                     switch (experimentSubOptions.Type)
                     {
@@ -133,6 +133,32 @@ namespace Perceptron
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
+                    break;
+                case "test":
+                    var testSubOptions = (TestSubOptions)invokedSubOptions;
+
+                    if (!testSubOptions.Validate()) Environment.Exit(Parser.DefaultExitCodeFail);
+
+                    var json = File.ReadAllText(testSubOptions.PerceptronJsonPath);
+
+                    var p = PerceptronTrainer.CreatePerceptron(json);
+
+                    if (p == null)
+                    {
+                        ConsoleHelper.WriteErrorLine("Perceptron json is invalid");
+                        Environment.Exit(Parser.DefaultExitCodeFail);
+                    }
+
+                    if (testSubOptions.TestAnd) PerceptronTrainer.Test_And(p, true);
+
+                    if (!double.IsNaN(testSubOptions.X1) && !double.IsNaN(testSubOptions.X2))
+                    {
+                        var input = new[] { testSubOptions.X1, testSubOptions.X2 };
+                        Console.WriteLine(p.Feedforward(input));
+                    }
+
+                    if (testSubOptions.Octave) Console.WriteLine(p.GenerateOctaveCode());
 
                     break;
                 default:

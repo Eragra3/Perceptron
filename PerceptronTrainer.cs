@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Perceptron
 {
     public static class PerceptronTrainer
     {
+        private const int MaximumEpochs = 10000;
         private static readonly Random Rng = new Random();
 
         public static IList<TrainObject> andTraingData;
@@ -20,6 +22,13 @@ namespace Perceptron
             andTraingData.Add(t2);
             andTraingData.Add(t3);
             andTraingData.Add(t4);
+        }
+
+        public static Perceptron CreatePerceptron(string json)
+        {
+            var perceptron = Perceptron.FromJson(json);
+
+            return perceptron;
         }
 
         public static Perceptron CreatePerceptron(
@@ -38,6 +47,8 @@ namespace Perceptron
                 initialWeights[i] = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
             }
             double bias = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
+
+            if (useAdaline) stepFunction = StepFunction.Bipolar;
 
             Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias, stepFunction, useAdaline);
 
@@ -70,13 +81,15 @@ namespace Perceptron
 
                     if (verbose) ConsoleHelper.WriteLine($" current error - {errorSum}");
 
-                    if (epoch > 10000)
+                    if (epoch <= MaximumEpochs) continue;
+                    if (verbose)
                     {
                         ConsoleHelper.WriteErrorLine("Stopping!");
                         ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
                         ConsoleHelper.WriteErrorLine($"Using adaline, current values: error-{errorSum} > threshold-{adalineThreshold}");
-                        throw new ExperimentRunner.PerceptronLearnException();
                     }
+
+                    return 0;
                 }
                 while (errorSum > adalineThreshold);
             }
@@ -95,12 +108,14 @@ namespace Perceptron
                             isTrained = false;
                         }
                     }
-                    if (epoch > 10000)
+                    if (epoch <= MaximumEpochs) continue;
+                    if (verbose)
                     {
                         ConsoleHelper.WriteErrorLine("Stopping!");
                         ConsoleHelper.WriteErrorLine("Did not learn nothing in 10000 epochs!");
-                        throw new ExperimentRunner.PerceptronLearnException();
                     }
+
+                    return 0;
                 }
             }
             return epoch;

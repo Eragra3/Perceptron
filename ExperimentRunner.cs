@@ -36,34 +36,35 @@ namespace Perceptron
                 new KeyValuePair<string, object>("adalineThreshold", adalineThreshold),
                 new KeyValuePair<string, object>("verbose", verbose)
                 );
-            CsvPrinter.DumpHeaderLine("n", "avg epochs");
+            CsvPrinter.DumpHeaderLine("n", "learning rate", "min epochs", "max epochs", "avg epochs");
 
             int experimentIndex = 0;
             for (double learningRate = start; learningRate <= end; learningRate += step)
             {
                 experimentIndex++;
+
+                var minEpochs = int.MaxValue;
                 var epochsSum = 0;
+                var maxEpochs = 0;
+
                 var run = 0;
                 Perceptron p = null;
                 if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
-                try
-                {
-                    for (int j = 0; j < repetitions; j++)
-                    {
-                        run++;
-                        p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction, useAdaline);
-                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
 
-                        epochsSum += epochs;
-                    }
-                }
-                catch (PerceptronLearnException)
+                for (int j = 0; j < repetitions; j++)
                 {
-                    ConsoleHelper.WriteErrorLine("Perceptron can't Test_And params:");
-                    p?.Dump();
+                    run++;
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, initialWeightsLimit, inputsCount, stepFunction, useAdaline);
+                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
+
+                    if (epochs < minEpochs) minEpochs = epochs;
+                    if (epochs > maxEpochs) maxEpochs = epochs;
+
+                    epochsSum += epochs;
                 }
+
                 var avarageEpochs = epochsSum / run;
-                CsvPrinter.DumpLine(experimentIndex, avarageEpochs);
+                CsvPrinter.DumpLine(experimentIndex, learningRate, minEpochs, maxEpochs, avarageEpochs);
             }
         }
 
@@ -94,34 +95,35 @@ namespace Perceptron
                 new KeyValuePair<string, object>("adalineThreshold", adalineThreshold),
                 new KeyValuePair<string, object>("verbose", verbose)
                 );
-            CsvPrinter.DumpHeaderLine("n", "avg epochs");
+            CsvPrinter.DumpHeaderLine("n", "initial weights limit", "min epochs", "max epochs", "avg epochs");
 
             int experimentIndex = 0;
             for (double weightsLimit = start; weightsLimit <= end; weightsLimit += step)
             {
                 experimentIndex++;
+
+                var minEpochs = int.MaxValue;
                 var epochsSum = 0;
+                var maxEpochs = 0;
+
                 var run = 0;
                 Perceptron p = null;
                 if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
-                try
-                {
-                    for (int j = 0; j < repetitions; j++)
-                    {
-                        run++;
-                        p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, useAdaline);
-                        var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
 
-                        epochsSum += epochs;
-                    }
-                }
-                catch (PerceptronLearnException)
+                for (int j = 0; j < repetitions; j++)
                 {
-                    ConsoleHelper.WriteErrorLine("Perceptron can't learn with params:");
-                    p?.Dump();
+                    run++;
+                    p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, useAdaline);
+                    var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, verbose);
+
+                    if (epochs < minEpochs) minEpochs = epochs;
+                    if (epochs > maxEpochs) maxEpochs = epochs;
+
+                    epochsSum += epochs;
                 }
+
                 var avarageEpochs = epochsSum / run;
-                CsvPrinter.DumpLine(experimentIndex, avarageEpochs);
+                CsvPrinter.DumpLine(experimentIndex, weightsLimit, minEpochs, maxEpochs, avarageEpochs);
             }
 
         }
@@ -150,13 +152,17 @@ namespace Perceptron
                 new KeyValuePair<string, object>("inputsCount", inputsCount),
                 new KeyValuePair<string, object>("verbose", verbose)
                 );
-            CsvPrinter.DumpHeaderLine("n", "avg epochs", "final error");
+            CsvPrinter.DumpHeaderLine("n", "adaline threshold", "min epochs", "max epochs", "avg epochs", "final error");
 
             int experimentIndex = 0;
             for (double adalineTreshold = start; adalineTreshold <= end; adalineTreshold += step)
             {
                 experimentIndex++;
+
+                var minEpochs = int.MaxValue;
                 var epochsSum = 0;
+                var maxEpochs = 0;
+
                 var run = 0;
                 Perceptron p = null;
                 if (verbose) ConsoleHelper.WriteYellowLine($"Experiment - {experimentIndex}");
@@ -168,17 +174,20 @@ namespace Perceptron
                         p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, true);
                         var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineTreshold, verbose);
 
+                        if (epochs < minEpochs) minEpochs = epochs;
+                        if (epochs > maxEpochs) maxEpochs = epochs;
+
                         epochsSum += epochs;
                     }
                 }
                 catch (PerceptronLearnException)
                 {
-                    ConsoleHelper.WriteErrorLine("Perceptron can't learn with params:");
+                    if (verbose) ConsoleHelper.WriteErrorLine("Perceptron can't learn with params:");
                     p?.Dump();
                 }
                 var avarageEpochs = epochsSum / run;
                 var currentError = PerceptronTrainer.GetAdalineError(p);
-                CsvPrinter.DumpLine(experimentIndex, avarageEpochs, currentError);
+                CsvPrinter.DumpLine(experimentIndex, adalineTreshold, minEpochs, maxEpochs, avarageEpochs, currentError);
             }
 
         }

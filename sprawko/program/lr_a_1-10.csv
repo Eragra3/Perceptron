@@ -1,0 +1,13 @@
+sep=|
+start:1|end:10|step:1|repetitions:1000|initialWeightsLimit:1|stepFunction:Unipolar|inputsCount:2|useAdalvine:True|adalineThreshold:0,4|verbose:False
+n|learning rate|min epochs|max epochs|avg epochs
+1|1|0|7993|32
+2|2|1|389|345
+3|3|1|210|192
+4|4|1|144|135
+5|5|1|114|109
+6|6|1|99|96
+7|7|85|89|87
+8|8|80|83|81
+9|9|75|78|76
+10|10|72|75|73

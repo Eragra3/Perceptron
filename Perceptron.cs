@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Perceptron
 {
@@ -15,6 +16,7 @@ namespace Perceptron
         [JsonProperty]
         private double _bias;
         [JsonProperty]
+        [JsonConverter(typeof(StringEnumConverter))]
         private StepFunction _stepFunction;
         [JsonProperty]
         private readonly bool _isAdaline;
@@ -67,12 +69,14 @@ namespace Perceptron
                 if (solution == 0) solution = -1;
             }
 
-            var decision = Feedforward(input);
+
+            double net = Net(input);
+            var decision = Step(net);
 
             double error;
             if (IsAdaline)
             {
-                error = solution - Net(input);
+                error = solution - net;
             }
             else
             {
@@ -147,7 +151,16 @@ namespace Perceptron
 
         public static Perceptron FromJson(string json)
         {
-            var perceptron = JsonConvert.DeserializeObject<Perceptron>(json);
+            Perceptron perceptron;
+            try
+            {
+                perceptron = JsonConvert.DeserializeObject<Perceptron>(json);
+            }
+            catch (Exception)
+            {
+                return null;
+                throw;
+            }
             return perceptron;
         }
     }

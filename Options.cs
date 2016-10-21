@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
@@ -65,13 +66,13 @@ namespace Perceptron
         //public double Step { get; set; }
 
         [ValueOption(0)]
-        public double From { get; set; }
+        public double From { get; set; } = double.NaN;
 
         [ValueOption(1)]
-        public double Step { get; set; }
+        public double Step { get; set; } = double.NaN;
 
         [ValueOption(2)]
-        public double To { get; set; }
+        public double To { get; set; } = double.NaN;
 
         [ValueOption(3)]
         public int Repetitions { get; set; } = 1000;
@@ -93,6 +94,63 @@ namespace Perceptron
 
         [Option('t', "adaline-threshold", HelpText = "Adaline error treshold")]
         public double AdalineThreshold { get; set; } = 1.0;
+
+        public bool Validate()
+        {
+            var isError = false;
+            if (From == double.NaN)
+            {
+                ConsoleHelper.WriteErrorLine($"{nameof(From)} param cannot be null");
+                isError = true;
+            }
+            if (Step == double.NaN)
+            {
+                ConsoleHelper.WriteErrorLine($"{nameof(Step)} param cannot be null");
+                isError = true;
+            }
+            if (To == double.NaN)
+            {
+                ConsoleHelper.WriteErrorLine($"{nameof(To)} param cannot be null");
+                isError = true;
+            }
+            if (Repetitions <= 0)
+            {
+                ConsoleHelper.WriteErrorLine($"{nameof(Repetitions)} param must be grater than 0");
+                isError = true;
+            }
+
+            return !isError;
+        }
+    }
+
+
+    public class TestSubOptions : CommonSubOptions
+    {
+        [ValueOption(0)]
+        public string PerceptronJsonPath { get; set; }
+
+        [ValueOption(0)]
+        public double X1 { get; set; } = double.NaN;
+
+        [ValueOption(0)]
+        public double X2 { get; set; } = double.NaN;
+
+        [Option("testand", HelpText = "")]
+        public bool TestAnd { get; set; } = false;
+
+        [Option('o', "octave", HelpText = "Generate octave code to plot approximated function")]
+        public bool Octave { get; set; } = false;
+
+        public bool Validate()
+        {
+            if (!File.Exists(PerceptronJsonPath))
+            {
+                Console.Error.WriteLine($"File does not exist - {PerceptronJsonPath}");
+                return false;
+            }
+
+            return true;
+        }
     }
 
     public class Options
@@ -104,7 +162,10 @@ namespace Perceptron
         public TrainSubOptions TrainVerb { get; set; }
 
         [VerbOption("experiment", HelpText = "Run experiment")]
-        public ExperimentSubOptions Command { get; set; }
+        public ExperimentSubOptions ExperimentVerb { get; set; }
+
+        [VerbOption("test", HelpText = "Test existing perceptron")]
+        public TestSubOptions TestVerb { get; set; }
 
         [HelpVerbOption]
         public string GetUsage(string verb)
