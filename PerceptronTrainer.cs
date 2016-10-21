@@ -41,14 +41,14 @@ namespace Perceptron
             if (learningRate <= 0)
                 throw new ArgumentException($"{nameof(learningRate)} cannot be 0! Nor negative. Faggot");
 
+            if (useAdaline) stepFunction = StepFunction.Bipolar;
+
             double[] initialWeights = new double[inputsCount];
             for (int i = 0; i < initialWeights.Length; i++)
             {
                 initialWeights[i] = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
             }
             double bias = initialWeightLimit * (Rng.NextDouble() * 2 - 1);
-
-            if (useAdaline) stepFunction = StepFunction.Bipolar;
 
             Perceptron perceptron = new Perceptron(initialWeights, learningRate, bias, stepFunction, useAdaline);
 
@@ -58,7 +58,8 @@ namespace Perceptron
         public static int TrainPerceptron_And(
             Perceptron perceptron,
             double adalineThreshold = 1,
-            bool verbose = false
+            bool verbose = false,
+            bool dumpData = false
             )
         {
             bool isTrained = false;
@@ -81,6 +82,8 @@ namespace Perceptron
 
                     if (verbose) ConsoleHelper.WriteLine($" current error - {errorSum}");
 
+                    if (dumpData) CsvPrinter.DumpLine(epoch, errorSum);
+
                     if (epoch <= MaximumEpochs) continue;
                     if (verbose)
                     {
@@ -99,15 +102,17 @@ namespace Perceptron
                 {
                     epoch++;
                     if (verbose) ConsoleHelper.WriteLine($"Learning epoch - {epoch}");
-                    isTrained = true;
+
+                    double errorSum = 0;
                     foreach (var trainObject in andTraingData)
                     {
+                        errorSum = 0;
                         var error = Math.Abs(perceptron.Train(trainObject));
-                        if (error > 0.000001)
-                        {
-                            isTrained = false;
-                        }
+                        errorSum += error;
                     }
+                    if (Math.Abs(errorSum) < 0.000001) isTrained = true;
+
+                    if (dumpData) CsvPrinter.DumpLine(epoch, errorSum);
                     if (epoch <= MaximumEpochs) continue;
                     if (verbose)
                     {

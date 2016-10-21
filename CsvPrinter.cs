@@ -8,14 +8,15 @@ namespace Perceptron
 {
     public static class CsvPrinter
     {
-        private const char Separator = '|';
+        public const char SEPARATOR = '|';
+
         public static void DumpLine(params object[] values)
         {
             for (int i = 0; i < values.Length; i++)
             {
                 var v = values[i];
                 Console.Write(v);
-                if (i + 1 < values.Length) Console.Write(Separator);
+                if (i + 1 < values.Length) Console.Write(SEPARATOR);
             }
             Console.WriteLine();
         }
@@ -26,19 +27,19 @@ namespace Perceptron
             {
                 var v = values[i];
                 Console.Write(v);
-                if (i + 1 < values.Length) Console.Write(Separator);
+                if (i + 1 < values.Length) Console.Write(SEPARATOR);
             }
             Console.WriteLine();
         }
 
         public static void DumpParams(params KeyValuePair<string, object>[] values)
         {
-            Console.WriteLine($"sep={Separator}");
+            Console.WriteLine($"sep={SEPARATOR}");
             for (int i = 0; i < values.Length; i++)
             {
                 var v = values[i];
                 Console.Write($"{v.Key}:{v.Value}");
-                if (i + 1 < values.Length) Console.Write(Separator);
+                if (i + 1 < values.Length) Console.Write(SEPARATOR);
             }
             Console.WriteLine();
         }

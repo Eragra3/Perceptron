@@ -130,6 +130,15 @@ namespace Perceptron
                                 experimentSubOptions.Verbose
                                 );
                             break;
+                        case ExperimentRunner.ExperimentType.AdalineError:
+                            ExperimentRunner.AdalineError(
+                                experimentSubOptions.LearningRate,
+                                experimentSubOptions.InitialWeights,
+                                experimentSubOptions.StepFunction,
+                                experimentSubOptions.AdalineThreshold,
+                                2
+                                );
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

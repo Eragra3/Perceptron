@@ -16,3 +16,5 @@ Start-Process -NoNewWindow -FilePath perceptron.exe -ArgumentList "experiment 1 
 
 Start-Process -NoNewWindow -FilePath perceptron.exe -ArgumentList "experiment 0 0.1 1 -e InitialWeights -a -t 0.4" -RedirectStandardOutput iw_a_0-1.csv
 Start-Process -NoNewWindow -FilePath perceptron.exe -ArgumentList "experiment 1 1 11 -e InitialWeights -a -t 0.4" -RedirectStandardOutput iw_a_1-11.csv
+
+Start-Process -NoNewWindow -FilePath perceptron.exe -ArgumentList "experiment -e AdalineError -t 0.33" -RedirectStandardOutput "ae_0,33.csv"

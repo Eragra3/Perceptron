@@ -77,7 +77,7 @@ namespace Perceptron
         [ValueOption(3)]
         public int Repetitions { get; set; } = 1000;
 
-        [Option('e', "type", HelpText = "Experiment type (LearningRate, InitialWeights, AdalineThreshold)", Required = true)]
+        [Option('e', "type", HelpText = "Experiment type (LearningRate, InitialWeights, AdalineThreshold, AdalineError)", Required = true)]
         public ExperimentRunner.ExperimentType Type { get; set; }
 
         [Option('l', "learning-rate", HelpText = "Perceptron learning rate (must be greater than 0)")]
