@@ -193,8 +193,31 @@ namespace Perceptron
         public static void AdalineError(
             double learningRate,
             double weightsLimit,
-            StepFunction stepFunction,
             double adalineThreshold,
+            int inputsCount)
+        {
+
+            CsvPrinter.DumpParams(
+                new KeyValuePair<string, object>("weightsLimit", weightsLimit),
+                new KeyValuePair<string, object>("learningRate", learningRate),
+                new KeyValuePair<string, object>("inputsCount", inputsCount)
+                );
+            CsvPrinter.DumpHeaderLine("n", "error");
+
+            try
+            {
+                var p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, StepFunction.Bipolar, true);
+                var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, dumpData: true);
+            }
+            catch (PerceptronLearnException)
+            {
+            }
+        }
+
+        public static void Error(
+            double learningRate,
+            double weightsLimit,
+            StepFunction stepFunction,
             int inputsCount)
         {
 
@@ -208,8 +231,8 @@ namespace Perceptron
 
             try
             {
-                var p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, true);
-                var epochs = PerceptronTrainer.TrainPerceptron_And(p, adalineThreshold, dumpData: true);
+                var p = PerceptronTrainer.CreatePerceptron(learningRate, weightsLimit, inputsCount, stepFunction, false);
+                var epochs = PerceptronTrainer.TrainPerceptron_And(p, dumpData: true);
             }
             catch (PerceptronLearnException)
             {
@@ -226,7 +249,8 @@ namespace Perceptron
             LearningRate,
             InitialWeights,
             AdalineThreshold,
-            AdalineError
+            AdalineError,
+            Error
         }
     }
 }

@@ -125,7 +125,6 @@ namespace Perceptron
                                 experimentSubOptions.Repetitions,
                                 experimentSubOptions.LearningRate,
                                 experimentSubOptions.InitialWeights,
-                                experimentSubOptions.StepFunction,
                                 2,
                                 experimentSubOptions.Verbose
                                 );
@@ -134,8 +133,15 @@ namespace Perceptron
                             ExperimentRunner.AdalineError(
                                 experimentSubOptions.LearningRate,
                                 experimentSubOptions.InitialWeights,
-                                experimentSubOptions.StepFunction,
                                 experimentSubOptions.AdalineThreshold,
+                                2
+                                );
+                            break;
+                        case ExperimentRunner.ExperimentType.Error:
+                            ExperimentRunner.Error(
+                                experimentSubOptions.LearningRate,
+                                experimentSubOptions.InitialWeights,
+                                experimentSubOptions.StepFunction,
                                 2
                                 );
                             break;

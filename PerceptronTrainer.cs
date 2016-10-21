@@ -104,9 +104,9 @@ namespace Perceptron
                     if (verbose) ConsoleHelper.WriteLine($"Learning epoch - {epoch}");
 
                     double errorSum = 0;
+                    errorSum = 0;
                     foreach (var trainObject in andTraingData)
                     {
-                        errorSum = 0;
                         var error = Math.Abs(perceptron.Train(trainObject));
                         errorSum += error;
                     }
